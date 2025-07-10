@@ -61,17 +61,17 @@ func Lex(input string) ([]string, error) {
 
 		if string(c) == quote {
 
-			str := string(c) // Should be included
+			str := `"` // Should be included
 			idx += 1
 			c = input[idx]
 			for idx < l && string(c) != quote {
-				str += string(c)
-				idx += 1
 				c = input[idx]
+				str += string(input[idx])
+				idx += 1
 			}
-			if string(c) == quote {
-				str = string(c)
-			}
+			// if string(c) == quote {
+			// 	str += `"`
+			// }
 			Tokens = append(Tokens, str)
 
 			continue
