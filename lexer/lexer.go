@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"json_parser/utils"
 	"slices"
 )
 
@@ -13,30 +14,30 @@ var quote = "\""
 
 var numbers = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "e", "-"} // this includes floating nu,ber as well as negative ones
 
-var null = "null"
-
-var true = "true"
-
-var false = "false"
-
 func Lex(input string) ([]string, error) {
 	Tokens := []string{}
 	l := len(input)
-	idx := -1
+	idx := 0
 
 	for idx < l {
 
-		idx += 1
 		if idx >= l {
 			break
 		}
 		c := input[idx]
+
+		if input[idx] == 10 || input[idx] == 9 {
+			idx += 1
+			continue
+		}
 		if string(c) == whitespace {
+			idx += 1
 			continue
 		}
 
 		if slices.Contains(json_tokens, string(c)) {
 			Tokens = append(Tokens, string(c)) // Why not c but string(c)
+			idx += 1
 			continue
 		}
 
@@ -53,13 +54,14 @@ func Lex(input string) ([]string, error) {
 			}
 
 			Tokens = append(Tokens, input[idx:curr])
-			idx = curr - 1 //  Because at every beginning there is in increment
+			idx = curr //  Because at every beginning there is in increment
 
 			continue
 		}
 
 		if string(c) == quote {
-			str := "\"" + string(c) // Should be included
+
+			str := string(c) // Should be included
 			idx += 1
 			c = input[idx]
 			for idx < l && string(c) != quote {
@@ -68,25 +70,23 @@ func Lex(input string) ([]string, error) {
 				c = input[idx]
 			}
 			if string(c) == quote {
-				str = "\"" + string(c)
+				str = string(c)
 			}
 			Tokens = append(Tokens, str)
-			idx -= 1
+
 			continue
 		}
 		str := ""
-		for isAlphaNumeric(c) {
+		for idx < l && utils.IsAlphaNumeric(c) {
+
 			str += string(c)
 			idx += 1
 			c = input[idx]
+
 		}
 		Tokens = append(Tokens, str)
-		idx -= 1
+
 	}
 	return Tokens, nil
 
-}
-
-func isAlphaNumeric(c byte) bool {
-	return (c <= 'z' && c >= 'a') || (c <= '9' && c >= '0')
 }
