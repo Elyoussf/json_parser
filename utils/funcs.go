@@ -40,3 +40,13 @@ func IsNumber(str string) bool {
 func IsFloat(str string) bool {
 	return strings.Contains(str, ".") || strings.Contains(str, "e")
 }
+
+func ParseArray(idx *int, Tokens []string) {
+	//TO DO
+}
+
+func ParseObject(idx *int, Tokens []string) {
+	// SHOULD BE RESCURSIVE
+
+	// TODO
+}
