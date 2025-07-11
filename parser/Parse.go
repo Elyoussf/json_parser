@@ -1,77 +1,64 @@
 package parser
 
 import (
-	"bytes"
 	"fmt"
 	"json_parser/utils"
 	"strconv"
-	"strings"
 )
 
-func Syntacticanalysis(Tokens []string)( interface{}, error) {
+func ParseSimpleObject(Tokens []string) map[string]any {
+	var WaitingKey = ""
+	var idx = 1
+	res := make(map[string]any)
+	var err error
+	current := Tokens[0]
 
-	/*
-		Find { Expecting a string without either whitespaces the next string should be : then this could be a json object
-		OR Array , float , integer , string , null and boolean
-		Then expecting closing curly bracket if no an error should be thrown with wrong expectation
-	*/
-	l := len(Tokens)
-	
-	if Tokens[0] != "{" || Tokens[l-1] != "}"{
-		return  nil , fmt.Errorf("Invalid syntax curly brackets not found")
-	}
-	res := make(map[string]interface{})
-	i := 1
-	key := true // Means am expcting key now 
-	thekey := ""
-	for i < l-1 {
-		if !key {
-			// this is a value
-			val := Tokens[i]
-			if string(val[0]) == `"`{
-				if string(val[len(val)-1]) != `"`{
-					return nil , fmt.Errorf("Invalid format Syntax found double quote without corresponding one")
+	for idx < len(Tokens)-1 && current != "}" {
+		current = Tokens[idx]
+
+		if len(WaitingKey) == 0 && current != "," && current != ":" {
+
+			WaitingKey = current[1 : len(current)-1]
+
+			res[WaitingKey] = nil // reserving
+
+			idx += 1
+		} else {
+			if current == ":" || current == "," {
+				idx += 1
+				continue
+			} else {
+				var val any
+				if utils.IsNull(current) {
+					val = nil
 				}
-				res[thekey] = val
-			}else{
-				if utils.IsNull(val){
-					res[thekey] = nil
-				}else if utils.IsBool(val){
-					res[thekey] = (val == "true")
-				}else if utils.IsNumber(val){
-					if utils.IsFloat(val){
-						f,err := strconv.ParseFloat(val,64)
-						if err != nil {
-							return nil , fmt.Errorf("Error occured while parsing a float value in json")
-						}
-						res[thekey] = f
+				if utils.IsBool(current) {
+					val = (current == "true")
+				}
+				if utils.IsNumber(current) && utils.IsFloat(current) {
+
+					val, err = strconv.ParseFloat(current, 64)
+					if err != nil {
+						fmt.Println("Error while converting to float")
+						return nil
 					}
-				}else if {
-					//ToDO for objects and arrays 
+				} else if utils.IsNumber(current) {
+					val, _ = strconv.ParseInt(current, 10, 16) // Not sure 16
 				}
+				if val == nil && current != "null" {
+
+					val = current
+				}
+				res[WaitingKey] = val
+
+				idx += 1
+				WaitingKey = ""
 			}
 		}
-
-
-		res[Tokens[i]] = nil //reservation LOL
-		thekey = Tokens[i]
-		if i >=l-3 {
-			// {key:} or {key}
-			return  nil , fmt.Errorf("Invalid Syntax Found a Key without value!")
-		} 
-		if Tokens[i+1] != ":"{
-			return  nil , fmt.Errorf("Invalid Syntax Found a Key without value!")
-		}
-		key := false
-		i+=2
-
 	}
+	return res
 }
 
-//ParseString  --> string
-//ParseBoolean --> bool
-//ParseObject --> map[string]interface{}
-//ParseNull --> nil
-//ParseArray --> []interface{}
-
-
+// func ParseSimpleArray(Tokens []string) []any{
+// 	res := make([]any)
+// }

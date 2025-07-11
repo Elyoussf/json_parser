@@ -12,7 +12,7 @@ var whitespace = " "
 
 var quote = "\""
 
-var numbers = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "e", "-"} // this includes floating nu,ber as well as negative ones
+var numbers = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "e", "-", "+"} // this includes floating nu,ber as well as negative ones
 
 func Lex(input string) ([]string, error) {
 	Tokens := []string{}

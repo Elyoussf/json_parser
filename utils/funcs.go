@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var Numbers = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "e", "-"}
+var Numbers = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "e", "-", "+"}
 
 func IsAlphaNumeric(c byte) bool {
 	return (c <= 'z' && c >= 'a') || (c <= '9' && c >= '0') || (c <= 'Z' && c >= 'A')
@@ -41,12 +41,12 @@ func IsFloat(str string) bool {
 	return strings.Contains(str, ".") || strings.Contains(str, "e")
 }
 
-func ParseArray(idx *int, Tokens []string) {
-	//TO DO
-}
+// func ParseArray(val string) []interface{} {
 
-func ParseObject(idx *int, Tokens []string) {
-	// SHOULD BE RESCURSIVE
+// }
 
-	// TODO
-}
+// func ParseObject(idx *int, Tokens []string) {
+// 	// SHOULD BE RESCURSIVE
+
+// 	// TODO
+// }
