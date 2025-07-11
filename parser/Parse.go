@@ -12,16 +12,17 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 	res := make(map[string]any)
 	var err error
 	current := Tokens[0]
-
 	for idx < len(Tokens)-1 && current != "}" {
-		current = Tokens[idx]
 
+		current = Tokens[idx]
 		if len(WaitingKey) == 0 && current != "," && current != ":" {
+			if len(current) <= 2 {
+				idx += 1
+				continue
+			}
 
 			WaitingKey = current[1 : len(current)-1]
-
 			res[WaitingKey] = nil // reserving
-
 			idx += 1
 		} else {
 			if current == ":" || current == "," {
@@ -29,6 +30,29 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 				continue
 			} else {
 				var val any
+				if current == "{" {
+					open := 1
+					i := idx + 1
+					for Tokens[i] != "}" && open != 0 {
+						if Tokens[i] == "{" {
+							open += 1
+						}
+						if Tokens[i] == "}" {
+							open -= 1
+						}
+						if open == 0 {
+							break
+						}
+						i += 1
+					}
+					subTokens := Tokens[idx : i+1]
+					val = ParseSimpleObject(subTokens)
+					res[WaitingKey] = val
+
+					idx = i + 1
+					WaitingKey = ""
+					continue
+				}
 				if current == "[" {
 					open := 1
 					i := idx + 1
@@ -50,6 +74,7 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 
 					idx = i + 1
 					WaitingKey = ""
+					continue
 				}
 				if utils.IsNull(current) {
 					val = nil
@@ -69,8 +94,9 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 				}
 				if val == nil && current != "null" {
 
-					val = current
+					val = current[1 : len(current)-1]
 				}
+
 				res[WaitingKey] = val
 
 				idx += 1
@@ -89,6 +115,28 @@ func ParseSimpleArray(Tokens []string) []any {
 	current := Tokens[idx]
 
 	for idx < len(Tokens) && current != "]" {
+		if current == "[" {
+			open := 1
+			i := idx + 1
+			for Tokens[i] != "]" && open != 0 {
+				if Tokens[i] == "[" {
+					open += 1
+				}
+				if Tokens[i] == "]" {
+					open -= 1
+				}
+				if open == 0 {
+					break
+				}
+				i += 1
+			}
+			subTokens := Tokens[idx : i+1]
+			res := ParseSimpleArray(subTokens)
+			arr = append(arr, res)
+			idx = i + 1
+			current = Tokens[idx]
+			continue
+		}
 		if current == "{" {
 			open := 1
 			i := idx + 1
@@ -144,7 +192,7 @@ func ParseSimpleArray(Tokens []string) []any {
 		}
 
 		if utils.IsAllAlphaNumeric(current) || len(current) == 0 || (current[0] == current[len(current)-1] && string(current[0]) == `"`) {
-			arr = append(arr, current)
+			arr = append(arr, current[1:len(current)-1])
 			idx += 1
 			current = Tokens[idx]
 			continue

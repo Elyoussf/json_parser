@@ -7,12 +7,30 @@ import (
 )
 
 func main() {
-	json := `{
-  "name" : "Hamza",
-  "age" : 21 ,
-  "infos" : [123,null,"hamza",false,"   ",{"age":45}]
-  }`
-	val, _ := lexer.Lex(json)
+	data := `{
+  "name": "Hamza",
+  "contacts": [
+    {
+      "type": "email",
+      "value": "hamza@example.com"
+    },
+    {
+      "type": "phone",
+      "value": "+212600000000"
+    }
+  ],
+  "settings": {
+    "notifications": {
+      "email": null,
+      "sms": false
+    },
+    "theme": "dark"
+  },
+  "active": true
+}
+
+`
+	val, _ := lexer.Lex(data)
 
 	res := parser.ParseSimpleObject(val)
 
