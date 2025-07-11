@@ -29,6 +29,28 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 				continue
 			} else {
 				var val any
+				if current == "[" {
+					open := 1
+					i := idx + 1
+					for Tokens[i] != "]" && open != 0 {
+						if Tokens[i] == "[" {
+							open += 1
+						}
+						if Tokens[i] == "]" {
+							open -= 1
+						}
+						if open == 0 {
+							break
+						}
+						i += 1
+					}
+					subTokens := Tokens[idx : i+1]
+					val = ParseSimpleArray(subTokens)
+					res[WaitingKey] = val
+
+					idx = i + 1
+					WaitingKey = ""
+				}
 				if utils.IsNull(current) {
 					val = nil
 				}
@@ -59,6 +81,74 @@ func ParseSimpleObject(Tokens []string) map[string]any {
 	return res
 }
 
-// func ParseSimpleArray(Tokens []string) []any{
-// 	res := make([]any)
-// }
+func ParseSimpleArray(Tokens []string) []any {
+
+	var arr []any
+
+	idx := 1
+	current := Tokens[idx]
+
+	for idx < len(Tokens) && current != "]" {
+		if current == "{" {
+			open := 1
+			i := idx + 1
+			for Tokens[i] != "}" && open != 0 {
+				if Tokens[i] == "{" {
+					open += 1
+				}
+				if Tokens[i] == "}" {
+					open -= 1
+				}
+				if open == 0 {
+					break
+				}
+				i += 1
+			}
+			subTokens := Tokens[idx : i+1]
+			res := ParseSimpleObject(subTokens)
+			arr = append(arr, res)
+			idx = i + 1
+			current = Tokens[idx]
+			continue
+		}
+		if current == "," {
+			idx += 1
+			current = Tokens[idx]
+			continue
+		}
+		if utils.IsNull(current) {
+			arr = append(arr, nil)
+			idx += 1
+			current = Tokens[idx]
+			continue
+		}
+		if utils.IsBool(current) {
+			v, _ := strconv.ParseBool(current)
+			arr = append(arr, v)
+			idx += 1
+			current = Tokens[idx]
+			continue
+		}
+		if utils.IsNumber(current) {
+			var v any
+			if utils.IsFloat(current) {
+				v, _ = strconv.ParseFloat(current, 64)
+			} else {
+				v, _ = strconv.ParseInt(current, 10, 16) // for larger numbers
+			}
+			arr = append(arr, v)
+			idx += 1
+			current = Tokens[idx]
+			continue
+
+		}
+
+		if utils.IsAllAlphaNumeric(current) || len(current) == 0 || (current[0] == current[len(current)-1] && string(current[0]) == `"`) {
+			arr = append(arr, current)
+			idx += 1
+			current = Tokens[idx]
+			continue
+		}
+	}
+	return arr
+}
