@@ -9,6 +9,7 @@ import (
 func main() {
 	data := `{
   "name": "Hamza",
+
   "contacts": [
     {
       "type": "email",
@@ -19,6 +20,7 @@ func main() {
       "value": "+212600000000"
     }
   ],
+    "active": true,
   "settings": {
     "notifications": {
       "email": null,
@@ -26,12 +28,12 @@ func main() {
     },
     "theme": "dark"
   },
-  "active": true
+  
 }
 
 `
 	val, _ := lexer.Lex(data)
-
+  fmt.Println("Starting out")
 	res := parser.ParseSimpleObject(val)
 
 	fmt.Println(res)
